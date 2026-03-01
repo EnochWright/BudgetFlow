@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Budget Flow</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+
+    <!-- Local Chart.js for Projections -->
+    <script src="js/chart.umd.js"></script>
+
+    <!-- Local Capacitor Core -->
+    <script type="module">
+        import { Capacitor } from './js/capacitor.js';
+        window.Capacitor = Capacitor;
+    </script>
+</head>
+
+<body>
+    <div class="app-container">
+
+        <!-- Header -->
+        <header class="glass-header">
+            <div class="header-title">
+                <img src="img/logo.png" alt="Budget Flow Logo" class="app-logo">
+                <h1>Budget Flow</h1>
+            </div>
+            <div class="header-actions">
+                <button id="add-btn" class="icon-btn" aria-label="Add Transaction">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button id="report-btn" class="icon-btn" aria-label="Monthly Report">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                </button>
+                <div class="dropdown">
+                    <button id="menu-btn" class="icon-btn" aria-label="Menu">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <circle cx="12" cy="19" r="1"></circle>
+                        </svg>
+                    </button>
+                    <div id="dropdown-menu" class="dropdown-content">
+                        <button id="import-btn" class="dropdown-item">Import</button>
+                        <button id="backup-btn" class="dropdown-item">Backup</button>
+                        <button id="export-csv-btn" class="dropdown-item">Export (CSV)</button>
+                        <button id="about-btn" class="dropdown-item">About</button>
+                        <div style="border-top: 1px solid var(--card-border); margin: 4px 0;"></div>
+                        <button id="reset-btn" class="dropdown-item"
+                            style="color: var(--danger); font-weight: 500;">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+        </header>
+
+        <!-- Main Dashboard View -->
+        <main class="view active" id="view-dashboard">
+
+            <!-- Summary Stats -->
+            <div class="stats-container">
+                <div class="stat-card primary-gradient">
+                    <span class="stat-label">Current Balance</span>
+                    <h2 id="current-balance" class="stat-value">$0.00</h2>
+                    <div id="current-date-display" style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;"></div>
+                </div>
+                <div class="stat-card secondary-gradient">
+                    <span id="projected-low-label" class="stat-label">30-Day Low</span>
+                    <h2 id="projected-low" class="stat-value">$0.00</h2>
+                    <div id="projected-low-date" style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px;"></div>
+                </div>
+            </div>
+
+            <!-- Projections Chart -->
+            <div class="chart-section glass-card">
+                <div class="section-header">
+                    <h3>Projection</h3>
+                    <div class="projection-days-control">
+                        <label for="projection-days">Days:</label>
+                        <input type="number" id="projection-days" value="60" min="7" max="365">
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="projectionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tab Navigation for Lists -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-target="list-rules">Rules</button>
+                <button class="tab-btn" data-target="list-actuals">Actuals</button>
+                <button class="tab-btn" data-target="list-ledger">Ledger</button>
+            </div>
+
+            <!-- Lists Area -->
+            <div class="lists-container">
+
+                <!-- Rules List -->
+                <div class="list-view active" id="list-rules">
+                    <div id="rules-container" class="items-list">
+                        <!-- Rule items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Actuals List -->
+                <div class="list-view" id="list-actuals">
+                    <div id="actuals-container" class="items-list">
+                        <!-- Actual items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Ledger List -->
+                <div class="list-view" id="list-ledger">
+                    <div id="ledger-container" class="items-list">
+                        <!-- Ledger items will be injected here -->
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- ADD / EDIT MODAL (Hidden by default) -->
+        <div id="transaction-modal" class="modal-overlay">
+            <div class="modal-content glass-card form-card">
+                <header class="modal-header">
+                    <h2 id="modal-title">New Entry</h2>
+                    <button class="icon-btn close-modal">&times;</button>
+                </header>
+
+                <div class="form-toggle">
+                    <label class="toggle-control">
+                        <input type="radio" name="entry_type" value="rule" checked>
+                        <span class="control-label">Projection Rule</span>
+                    </label>
+                    <label class="toggle-control">
+                        <input type="radio" name="entry_type" value="actual">
+                        <span class="control-label">Actual Entry</span>
+                    </label>
+                </div>
+
+                <form id="entry-form">
+                    <input type="hidden" id="entry-id">
+
+                    <div class="form-group flow-type-group">
+                        <label>Type</label>
+                        <select id="entry-flow-type" required>
+                            <option value="outflow">Expense (Outflow)</option>
+                            <option value="inflow">Income (Inflow)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entry-name">Name</label>
+                        <input type="text" id="entry-name" placeholder="e.g. Mortgage" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entry-amount">Amount</label>
+                        <input type="number" id="entry-amount" step="0.01" placeholder="0.00" required>
+                    </div>
+
+                    <!-- Rule Specific Fields -->
+                    <div id="rule-fields">
+                        <div class="form-group">
+                            <label for="entry-frequency">Frequency</label>
+                            <select id="entry-frequency">
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="one-off">One-off</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="group-day-of-month">
+                            <label for="entry-day-of-month">Day of Month</label>
+                            <input type="number" id="entry-day-of-month" min="1" max="31" placeholder="e.g. 15">
+                        </div>
+
+                        <div class="form-group" id="group-day-of-week" style="display: none;">
+                            <label for="entry-day-of-week">Day of Week</label>
+                            <select id="entry-day-of-week">
+                                <option value="0">Sunday</option>
+                                <option value="1">Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                            </select>
+                        </div>
+
+                        <div class="date-row">
+                            <div class="form-group">
+                                <label for="entry-start-date">Start Date</label>
+                                <input type="date" id="entry-start-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="entry-end-date">End Date (Optional)</label>
+                                <input type="date" id="entry-end-date">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actual Specific Fields -->
+                    <div id="actual-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="actual-date">Date Occurred</label>
+                            <input type="date" id="actual-date">
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" id="btn-delete" class="btn-danger" style="display: none;">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Monthly Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-content glass-card"
+            style="width: 100%; max-width: 600px; height: 100%; max-height: 100%; border-radius: 0; padding-top: calc(20px + env(safe-area-inset-top)); display: flex; flex-direction: column;">
+            <div class="modal-header" style="margin-bottom: 10px;">
+                <h2>Monthly Budget</h2>
+                <button class="icon-btn" id="close-report-btn" aria-label="Close Report">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="report-content" style="flex: 1; overflow-y: auto; padding-right: 5px;">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">About Budget Flow</h3>
+                <button class="close-modal" id="close-about-btn"
+                    style="background: transparent; border: none; color: var(--text-color); font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+            <div style="padding-top: 15px; color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.5;">
+                <p><strong>What it does:</strong> Budget Flow helps you project future cash flow based on recurring
+                    bills, periodic incomes, and one-off transactions.</p>
+                <div style="margin: 15px 0; border-top: 1px solid var(--card-border);"></div>
+                <p style="margin-bottom: 5px;"><strong>Technologies Used:</strong></p>
+                <ul style="padding-left: 20px; margin-top: 0;">
+                    <li>Capacitor (Mobile Bridge)</li>
+                    <li>Chart.js (Visual Projections)</li>
+                    <li>Vanilla HTML/CSS/JS (UI)</li>
+                    <li>localStorage (Data)</li>
+                </ul>
+                <div style="margin: 15px 0; border-top: 1px solid var(--card-border);"></div>
+                <p style="text-align: center; margin-bottom: 0;">
+                    Made by <strong>Enoch Wright</strong><br>
+                    <a href="https://enochwright.com" target="_blank"
+                        style="color: var(--primary); text-decoration: none;">enochwright.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/database.js"></script>
+    <script src="js/projections.js"></script>
+    <script src="js/app.js?v=2"></script>
+</body>
+
+</html>

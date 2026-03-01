@@ -1,0 +1,615 @@
+/* =========================================================================
+   Base Colors & Typography
+   ========================================================================= */
+:root {
+    --bg-color: #0d1117;
+    --text-color: #e6edf3;
+    --text-muted: #8b949e;
+
+    --card-bg: rgba(22, 27, 34, 0.6);
+    --card-border: rgba(240, 246, 252, 0.1);
+
+    --primary: #58a6ff;
+    --primary-hover: #3182ce;
+    --danger: #f85149;
+    --danger-hover: #da3633;
+    --success: #2ea043;
+    --warning: #d29922;
+
+    --gradient-1: linear-gradient(135deg, #1f6feb 0%, #8957e5 100%);
+    --gradient-2: linear-gradient(135deg, #2ea043 0%, #3fb950 100%);
+
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================================
+   Utility Classes & Layout
+   ========================================================================= */
+.app-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    /* space for potential bottom nav */
+}
+
+.view {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.view.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================================
+   Header
+   ========================================================================= */
+.glass-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: calc(15px + env(safe-area-inset-top, 0px)) 20px 15px 20px;
+    background: rgba(13, 17, 23, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--card-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin: -20px -20px 20px -20px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-logo {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
+    border-radius: 8px;
+    /* Slight rounding for a sleek look */
+}
+
+.glass-header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: var(--gradient-1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    background: var(--card-bg);
+    transform: scale(1.05);
+}
+
+/* =========================================================================
+   Header Actions & Dropdown
+   ========================================================================= */
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    min-width: 180px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    margin-top: 10px;
+    padding: 8px 0;
+    border-radius: 12px;
+    background: #161b22;
+    border: 1px solid var(--card-border);
+}
+
+.dropdown-content.show {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.dropdown-item {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    padding: 12px 16px;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 0.95rem;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: rgba(30, 36, 45, 0.8);
+}
+
+/* =========================================================================
+   Stats Cards
+   ========================================================================= */
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    padding: 20px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.8;
+    z-index: -1;
+}
+
+.primary-gradient::before {
+    background: var(--gradient-1);
+}
+
+.secondary-gradient::before {
+    background: var(--gradient-2);
+}
+
+.stat-label {
+    display: block;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* =========================================================================
+   Chart Section
+   ========================================================================= */
+.glass-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 25px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.chart-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+.projection-days-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.projection-days-control input {
+    width: 60px;
+    padding: 4px 8px;
+    background: rgba(13, 17, 23, 0.5);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 0.85rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.projection-days-control input:focus,
+.projection-days-control input:hover {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(13, 17, 23, 0.8);
+}
+
+.chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+/* =========================================================================
+   Tabs
+   ========================================================================= */
+.tab-nav {
+    display: flex;
+    background: rgba(22, 27, 34, 0.4);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 10px 0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background: var(--card-bg);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* =========================================================================
+   Lists
+   ========================================================================= */
+.list-view {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.list-view.active {
+    display: block;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.list-item:hover {
+    background: rgba(30, 36, 45, 0.8);
+    transform: translateX(4px);
+}
+
+.item-main {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.item-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.item-amount {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.amount-inflow {
+    color: var(--success);
+}
+
+.amount-outflow {
+    color: var(--text-color);
+}
+
+.quick-log-btn {
+    opacity: 0.6;
+}
+
+.quick-log-btn:hover {
+    opacity: 1;
+    background: rgba(46, 160, 67, 0.1);
+    transform: scale(1.1);
+}
+
+.skip-btn {
+    opacity: 0.6;
+}
+
+.skip-btn:hover {
+    opacity: 1;
+    background: rgba(210, 153, 34, 0.1);
+    transform: scale(1.1);
+}
+
+/* =========================================================================
+   Modals & Forms
+   ========================================================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Mobile friendly bottom sheet */
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-bottom: 0;
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+    /* Safe area padding */
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header .close-modal {
+    font-size: 2rem;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+}
+
+/* Form Toggle */
+.form-toggle {
+    display: flex;
+    background: rgba(22, 27, 34, 0.4);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.toggle-control {
+    flex: 1;
+    position: relative;
+}
+
+.toggle-control input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.control-label {
+    display: block;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    transition: all 0.2s;
+}
+
+.toggle-control input:checked+.control-label {
+    background: var(--card-border);
+    color: var(--text-color);
+}
+
+/* Form Inputs */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 12px;
+    background: rgba(13, 17, 23, 0.5);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Hide spin buttons */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+/* Firefox date fix for dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+.date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Buttons */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-primary,
+.btn-danger {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    flex: 1;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: var(--danger-hover);
+}
+
+.btn-primary:active,
+.btn-danger:active {
+    transform: scale(0.98);
+}
+
+/* =========================================================================
+   Responsive / Mobile Constraints
+   ========================================================================= */
+@media (max-width: 600px) {
+    .stat-value {
+        font-size: 1.4rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+}
