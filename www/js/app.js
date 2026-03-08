@@ -406,6 +406,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Import/Export ---
 
+    async function shareNativeFile(fileName, data, encoding = 'utf8') {
+        try {
+            const Filesystem = window.Capacitor.Plugins.Filesystem;
+            const Share = window.Capacitor.Plugins.Share;
+
+            if (!Filesystem || !Share) {
+                throw new Error("Filesystem or Share plugin not found. Ensure they are installed and synced.");
+            }
+
+            const writeResult = await Filesystem.writeFile({
+                path: fileName,
+                data: data,
+                directory: 'CACHE',
+                encoding: encoding
+            });
+
+            await Share.share({
+                title: fileName,
+                url: writeResult.uri,
+                dialogTitle: 'Save or Share'
+            });
+        } catch (err) {
+            console.error('Error sharing native file:', err);
+            alert('Failed to share file: ' + err.message);
+        }
+    }
+
+    function downloadWebFile(blob, fileName) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
     function handleBackup() {
         menu.dropdown.classList.remove('show');
         const rules = window.db.getRules();
@@ -418,15 +456,15 @@ document.addEventListener('DOMContentLoaded', () => {
             actuals
         };
 
-        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `BudgetFlow_Backup_${window.projections.formatLocalDate(new Date())}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        const dataStr = JSON.stringify(backup, null, 2);
+        const fileName = `BudgetFlow_Backup_${window.projections.formatLocalDate(new Date())}.json`;
+
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+            shareNativeFile(fileName, dataStr, 'utf8');
+        } else {
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            downloadWebFile(blob, fileName);
+        }
     }
 
     function handleExportCSV() {
@@ -434,8 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const actuals = window.db.getActuals();
 
         // CSV Header
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Date,Name,Type,Amount,Status\n";
+        let csvContent = "Date,Name,Type,Amount,Status\n";
 
         // Sort actuals oldest first for traditional ledger view, or keep newest first
         const sortedActuals = [...actuals].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -447,13 +484,14 @@ document.addEventListener('DOMContentLoaded', () => {
             csvContent += row + "\n";
         });
 
-        const encodedUri = encodeURI(csvContent);
-        const a = document.createElement("a");
-        a.setAttribute("href", encodedUri);
-        a.setAttribute("download", `BudgetFlow_Actuals_${window.projections.formatLocalDate(new Date())}.csv`);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        const fileName = `BudgetFlow_Actuals_${window.projections.formatLocalDate(new Date())}.csv`;
+
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+            shareNativeFile(fileName, csvContent, 'utf8');
+        } else {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            downloadWebFile(blob, fileName);
+        }
     }
 
     function handleImport(e) {
